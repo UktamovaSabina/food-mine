@@ -1,5 +1,6 @@
-<app-not-found [visible]="!food" notFoundMessage="Product Not Found" resetLinkText="Back To HomePage"></app-not-found>
-<div class="container">
+<app-not-found [visible]="!(food$$ | async)" notFoundMessage="Product Not Found" resetLinkText="Back To HomePage">
+</app-not-found>
+<div *ngIf="(food$$ | async) as food" class="container">
     <img [src]="food.imageUrl" [alt]="food.name">
 
     <div class="details">
@@ -36,6 +37,6 @@
             </span>
         </div>
 
-        <button (click)="addToCart()">Add to Cart</button>
+        <button (click)="addToCart(food)">Add to Cart</button>
     </div>
 </div>

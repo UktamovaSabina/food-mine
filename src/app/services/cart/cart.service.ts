@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { Cart } from '../../shared/models/Cart';
 import { CartItem } from '../../shared/models/CartItem';
 import { Food } from '../../shared/models/Food';
@@ -7,30 +8,36 @@ import { Food } from '../../shared/models/Food';
   providedIn: 'root'
 })
 export class CartService {
-  private cart: Cart = new Cart();
+  private storeCart$$: BehaviorSubject<Cart> = new BehaviorSubject<Cart>(new Cart());
+  public readonly cart$: Observable<Cart> = this.storeCart$$.asObservable();
+
 
   addToCart(food: Food): void {
-    let cartItem = this.cart.items.find(item => item.food.id === food.id)
-
+    const cart = this.storeCart$$.value;
+    let cartItem = cart.items.find(item => item.food.id === food.id);
     if (cartItem) {
-      this.changeQuantity(food.id, (cartItem.quantity + 1))
-      return
+      this.changeQuantity(food.id, cartItem.quantity + 1);
+    } else {
+      cart.items.push(new CartItem(food));
     }
-
-    this.cart.items.push(new CartItem(food));
+    this.storeCart$$.next(cart);
   }
 
   removeFromCart(foodId: number): void {
-    this.cart.items = this.cart.items.filter(item => item.food.id != foodId);
+    const cart = this.storeCart$$.value;
+    cart.items = cart.items.filter(item => item.food.id !== foodId);
+    this.storeCart$$.next(cart);
   }
 
   changeQuantity(foodId: number, quantity: number) {
-    let cartItem = this.cart.items.find(item => item.food.id === foodId);
+    const cart = this.storeCart$$.value;
+    let cartItem = cart.items.find(item => item.food.id === foodId);
     if (!cartItem) return;
     cartItem.quantity = quantity;
+    this.storeCart$$.next(cart);
   }
 
-  getCart(): Cart {
-    return this.cart;
+  getCart(): Observable<Cart> {
+    return this.storeCart$$;
   }
 }

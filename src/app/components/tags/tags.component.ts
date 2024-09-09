@@ -19,8 +19,8 @@ export class TagsComponent implements OnInit {
   constructor(private foodService: FoodService) { }
 
   ngOnInit(): void {
-    if (!this.foodPageTags)
+    if (!this.foodPageTags) {
       this.tags = this.foodService.getAllTags()
+    }
   }
-
 }
